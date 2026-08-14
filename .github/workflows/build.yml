@@ -51,7 +51,7 @@ jobs:
         run: npm install --global pnpm@11.7.0
 
       - name: Install locked dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --registry=https://registry.npmjs.org
 
       - name: Run tests
         run: pnpm test
