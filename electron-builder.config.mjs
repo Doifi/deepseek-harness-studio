@@ -8,7 +8,7 @@ export default {
   copyright: 'Copyright © 2026 DeepSeek Harness Studio contributors',
   asar: false,
   compression: 'maximum',
-  artifactName: '${productName}-${version}-${os}-${arch}.${ext}',
+  artifactName: 'DeepSeek-Harness-Studio-${version}-${os}-${arch}.${ext}',
   electronUpdaterCompatibility: '>=2.16',
   extraMetadata: {
     studioUpdateUrl: metadataUpdateUrl,

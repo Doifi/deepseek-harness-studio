@@ -22,4 +22,6 @@ test('release builds embed their trusted HTTPS feed in app metadata and publishe
 
   assert.equal(config.extraMetadata.studioUpdateUrl, updateUrl)
   assert.equal(config.publish[0].url, updateUrl)
+  assert.equal(config.artifactName, 'DeepSeek-Harness-Studio-${version}-${os}-${arch}.${ext}')
+  assert.doesNotMatch(config.artifactName, /\s/)
 })
