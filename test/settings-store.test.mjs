@@ -14,13 +14,28 @@ test('persists normalized Studio settings locally', async () => {
   assert.equal(store.value.autoCheckUpdates, true)
 
   await store.update({
-    skin: { preset: 'custom', accent: '#123456', background: '#000000', surface: '#101010', text: '#ffffff', radius: 18 },
+    skin: {
+      preset: 'custom',
+      accent: '#123456',
+      background: '#000000',
+      sidebar: '#050505',
+      surface: '#101010',
+      input: '#181818',
+      text: '#ffffff',
+      radius: 18,
+      fontScale: 110,
+      reducedMotion: true,
+    },
     autoCheckUpdates: false,
   })
   const restored = new SettingsStore(path)
   await restored.load()
   assert.equal(restored.value.skin.accent, '#123456')
+  assert.equal(restored.value.skin.sidebar, '#050505')
+  assert.equal(restored.value.skin.input, '#181818')
   assert.equal(restored.value.skin.radius, 18)
+  assert.equal(restored.value.skin.fontScale, 110)
+  assert.equal(restored.value.skin.reducedMotion, true)
   assert.equal(restored.value.autoCheckUpdates, false)
   assert.match(await readFile(path, 'utf8'), /"preset": "custom"/)
 })

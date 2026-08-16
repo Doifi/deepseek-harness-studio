@@ -7,7 +7,7 @@ import { ServiceSupervisor } from './service-supervisor.mjs'
 import { bundledNodeExecutable } from './node-runtime.mjs'
 import { errorPage, startupPage } from './pages.mjs'
 import { SettingsStore } from './settings-store.mjs'
-import { buildSkinCss, normalizeSkin, SKIN_PRESETS } from './skin.mjs'
+import { buildSkinCss, normalizeSkin, skinColorScheme, SKIN_PRESETS } from './skin.mjs'
 import { UpdateManager } from './update-manager.mjs'
 
 const require = createRequire(import.meta.url)
@@ -87,12 +87,29 @@ function configureNavigation(window) {
 
 async function decorateHarnessWindow(window) {
   if (window.isDestroyed() || !allowedLocalUrl(window.webContents.getURL())) return
+  const skin = normalizeSkin(settingsStore?.value.skin)
+  const colorScheme = skinColorScheme(skin)
   if (insertedSkinKey !== null) {
     await window.webContents.removeInsertedCSS(insertedSkinKey).catch(() => {})
     insertedSkinKey = null
   }
-  insertedSkinKey = await window.webContents.insertCSS(buildSkinCss(settingsStore?.value.skin))
+  window.webContents.setZoomFactor(skin.fontScale / 100)
+  insertedSkinKey = await window.webContents.insertCSS(buildSkinCss(skin))
   await window.webContents.executeJavaScript(`(() => {
+    const studioTheme = ${JSON.stringify(colorScheme)};
+    const root = document.documentElement;
+    if (studioTheme === 'official') {
+      const originalTheme = root.dataset.dshStudioOfficialTheme;
+      if (originalTheme) document.body.toggleAttribute('data-ds-dark-theme', originalTheme === 'dark');
+      delete root.dataset.dshStudioOfficialTheme;
+      delete root.dataset.dshStudioTheme;
+    } else {
+      if (!root.dataset.dshStudioOfficialTheme) {
+        root.dataset.dshStudioOfficialTheme = document.body.hasAttribute('data-ds-dark-theme') ? 'dark' : 'light';
+      }
+      document.body.toggleAttribute('data-ds-dark-theme', studioTheme === 'dark');
+      root.dataset.dshStudioTheme = studioTheme;
+    }
     if (document.querySelector('#dsh-studio-appearance-button')) return;
     const button = document.createElement('button');
     button.id = 'dsh-studio-appearance-button';

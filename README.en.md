@@ -18,7 +18,9 @@ Until production signing is configured, Windows and macOS may display an unknown
 - Bundled Electron, a separate official Node.js 24 LTS runtime, and pnpm.
 - Automatic startup, supervision, and graceful shutdown of the official `dsh web` service.
 - The official Web UI, plugin composition, MCP, Skills, sessions, and settings.
-- A local skin center with four curated presets, custom colors, and adjustable interface radii.
+- A complete local skin center with four curated presets, separate page/sidebar/panel/input/text colors, interface radius, zoom, and reduced-motion controls.
+- Live theme previews and contrast guidance, with consistent token coverage across the official Web UI sidebar, content, overlays, menus, and input components.
+- A Windows package optimized for faster extraction by using installation-oriented compression and excluding runtime-unused source maps and type declarations while preserving plugin dependencies.
 - Automatic update checks after startup, user-controlled download, progress feedback, and safe restart-to-install.
 - No session, model, credential, or workspace data is uploaded by the desktop updater.
 - Single-instance behavior, external-link isolation, a sandboxed renderer, and Windows/macOS build jobs.
@@ -56,6 +58,6 @@ The build produces installers, blockmaps, and the platform update metadata. The 
 
 macOS automatic updates require code signing. Windows signing is also strongly recommended before public distribution.
 
-The project pins `@deepseek-ai/dsh` to `0.1.0-rc.6`; the desktop wrapper version is `0.2.0`. Upstream remains a developer preview, so every dependency upgrade requires a fresh desktop acceptance run.
+The project pins `@deepseek-ai/dsh` to `0.1.0-rc.6`; the desktop wrapper version is `0.3.0`. Upstream remains a developer preview, so every dependency upgrade requires a fresh desktop acceptance run.
 
 See [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md) for license and attribution details.

@@ -29,6 +29,19 @@
       <div class="preset-grid" id="preset-grid" role="radiogroup" aria-label="皮肤预设"></div>
 
       <div class="custom-panel" id="custom-panel">
+        <div class="skin-preview" id="skin-preview" aria-label="当前皮肤实时预览">
+          <div class="preview-sidebar">
+            <strong>侧栏</strong>
+            <span class="preview-nav active">当前会话</span>
+            <span class="preview-nav">工作区</span>
+          </div>
+          <div class="preview-content">
+            <span class="preview-kicker">内容区域</span>
+            <strong>统一覆盖整个 Harness 界面</strong>
+            <span class="preview-copy">导航、正文、弹层与输入区使用同一套色板。</span>
+            <span class="preview-input">输入区域 <b>发送</b></span>
+          </div>
+        </div>
         <div class="color-grid">
           <label class="color-field">
             <span>强调色</span>
@@ -39,19 +52,43 @@
             <span class="color-control"><input type="color" id="background" value="#f7f8fa"><code id="background-value">#f7f8fa</code></span>
           </label>
           <label class="color-field">
+            <span>侧栏颜色</span>
+            <span class="color-control"><input type="color" id="sidebar" value="#f9fafb"><code id="sidebar-value">#f9fafb</code></span>
+          </label>
+          <label class="color-field">
             <span>面板颜色</span>
             <span class="color-control"><input type="color" id="surface" value="#ffffff"><code id="surface-value">#ffffff</code></span>
+          </label>
+          <label class="color-field">
+            <span>输入区颜色</span>
+            <span class="color-control"><input type="color" id="input" value="#ffffff"><code id="input-value">#ffffff</code></span>
           </label>
           <label class="color-field">
             <span>正文颜色</span>
             <span class="color-control"><input type="color" id="text" value="#181a1f"><code id="text-value">#181a1f</code></span>
           </label>
         </div>
-        <label class="range-field">
-          <span>界面圆角</span>
-          <input type="range" id="radius" min="4" max="24" step="1" value="12">
-          <output id="radius-value">12 px</output>
-        </label>
+        <div class="appearance-controls">
+          <label class="range-field">
+            <span>界面圆角</span>
+            <input type="range" id="radius" min="4" max="24" step="1" value="12">
+            <output id="radius-value">12 px</output>
+          </label>
+          <label class="range-field">
+            <span>界面缩放</span>
+            <input type="range" id="font-scale" min="85" max="120" step="5" value="100">
+            <output id="font-scale-value">100%</output>
+          </label>
+          <label class="motion-row">
+            <span>
+              <strong>减少界面动画</strong>
+              <small>关闭不必要的过渡和循环动画</small>
+            </span>
+            <input type="checkbox" id="reduced-motion">
+            <span class="switch" aria-hidden="true"></span>
+          </label>
+        </div>
+        <p class="contrast-status" id="contrast-status" aria-live="polite"></p>
         <p class="save-status" id="save-status" aria-live="polite">修改后自动保存并立即生效</p>
       </div>
     </section>

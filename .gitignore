@@ -3,5 +3,6 @@ release/
 artifacts/
 build/node-runtime/
 .cache/
+docs/design-audit/
 *.log
 .DS_Store

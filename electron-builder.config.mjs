@@ -7,7 +7,7 @@ export default {
   productName: 'DeepSeek Harness Studio',
   copyright: 'Copyright © 2026 DeepSeek Harness Studio contributors',
   asar: false,
-  compression: 'maximum',
+  compression: 'normal',
   artifactName: 'DeepSeek-Harness-Studio-${version}-${os}-${arch}.${ext}',
   electronUpdaterCompatibility: '>=2.16',
   extraMetadata: {
@@ -22,6 +22,10 @@ export default {
     'package.json',
     'LICENSE',
     'NOTICE.md',
+    '!node_modules/**/*.map',
+    '!node_modules/**/*.d.ts',
+    '!node_modules/**/*.d.mts',
+    '!node_modules/**/*.d.cts',
   ],
   extraResources: [
     { from: 'build/node-runtime', to: 'node-runtime' },

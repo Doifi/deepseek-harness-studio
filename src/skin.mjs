@@ -5,36 +5,46 @@ export const SKIN_PRESETS = Object.freeze([
     id: 'official',
     name: '官方原色',
     description: '保持 DeepSeek Harness 官方界面配色',
-    colors: { accent: '#4d6bfe', background: '#f7f8fa', surface: '#ffffff', text: '#181a1f' },
+    colors: { accent: '#4d6bfe', background: '#f7f8fa', sidebar: '#f9fafb', surface: '#ffffff', input: '#ffffff', text: '#181a1f' },
     radius: 12,
+    fontScale: 100,
+    reducedMotion: false,
   },
   {
     id: 'midnight',
     name: '深海夜航',
     description: '低眩光深色工作台',
-    colors: { accent: '#6e9bff', background: '#07111f', surface: '#0e1c2f', text: '#eaf1ff' },
+    colors: { accent: '#6e9bff', background: '#07111f', sidebar: '#0a1626', surface: '#0e1c2f', input: '#14243a', text: '#eaf1ff' },
     radius: 14,
+    fontScale: 100,
+    reducedMotion: false,
   },
   {
     id: 'violet',
     name: '星云紫',
     description: '克制的紫色暗调',
-    colors: { accent: '#a58bff', background: '#110d1c', surface: '#1c162b', text: '#f3edff' },
+    colors: { accent: '#a58bff', background: '#110d1c', sidebar: '#151020', surface: '#1c162b', input: '#251d37', text: '#f3edff' },
     radius: 16,
+    fontScale: 100,
+    reducedMotion: false,
   },
   {
     id: 'forest',
     name: '松林',
     description: '安静自然的绿色深调',
-    colors: { accent: '#63c69a', background: '#091510', surface: '#10231b', text: '#e8f7ef' },
+    colors: { accent: '#63c69a', background: '#091510', sidebar: '#0c1913', surface: '#10231b', input: '#172c22', text: '#e8f7ef' },
     radius: 12,
+    fontScale: 100,
+    reducedMotion: false,
   },
   {
     id: 'custom',
     name: '自定义',
     description: '使用自己的界面色板与圆角',
-    colors: { accent: '#4d6bfe', background: '#f7f8fa', surface: '#ffffff', text: '#181a1f' },
+    colors: { accent: '#4d6bfe', background: '#f7f8fa', sidebar: '#f9fafb', surface: '#ffffff', input: '#ffffff', text: '#181a1f' },
     radius: 12,
+    fontScale: 100,
+    reducedMotion: false,
   },
 ])
 
@@ -49,16 +59,27 @@ function validRadius(value, fallback) {
   return Number.isFinite(radius) ? Math.min(24, Math.max(4, Math.round(radius))) : fallback
 }
 
+function validFontScale(value, fallback) {
+  const scale = Number(value)
+  return Number.isFinite(scale) ? Math.min(120, Math.max(85, Math.round(scale))) : fallback
+}
+
 export function normalizeSkin(value = {}) {
   const preset = PRESET_BY_ID.get(value.preset) ?? PRESET_BY_ID.get('official')
   const source = value.preset === 'custom' ? value : preset
+  const background = validColor(source.background, preset.colors.background)
+  const surface = validColor(source.surface, preset.colors.surface)
   return {
     preset: preset.id,
     accent: validColor(source.accent, preset.colors.accent),
-    background: validColor(source.background, preset.colors.background),
-    surface: validColor(source.surface, preset.colors.surface),
+    background,
+    sidebar: validColor(source.sidebar, background),
+    surface,
+    input: validColor(source.input, surface),
     text: validColor(source.text, preset.colors.text),
     radius: validRadius(source.radius, preset.radius),
+    fontScale: validFontScale(source.fontScale, preset.fontScale),
+    reducedMotion: source.reducedMotion === true,
   }
 }
 
@@ -75,13 +96,23 @@ function isDark(color) {
   return luminance < 128
 }
 
+export function skinColorScheme(value = {}) {
+  const skin = normalizeSkin(value)
+  if (skin.preset === 'official') return 'official'
+  return isDark(skin.background) ? 'dark' : 'light'
+}
+
 export function buildSkinCss(value = {}) {
   const skin = normalizeSkin(value)
   const dark = isDark(skin.background)
   const secondaryText = rgba(skin.text, dark ? 0.72 : 0.66)
   const tertiaryText = rgba(skin.text, dark ? 0.5 : 0.46)
   const border = rgba(skin.text, dark ? 0.16 : 0.11)
+  const borderStrong = rgba(skin.text, dark ? 0.24 : 0.18)
   const hover = rgba(skin.accent, dark ? 0.18 : 0.1)
+  const active = rgba(skin.accent, dark ? 0.28 : 0.16)
+  const layer2 = rgba(skin.text, dark ? 0.055 : 0.035)
+  const layer3 = rgba(skin.text, dark ? 0.09 : 0.055)
   const base = `
 #dsh-studio-appearance-button {
   position: fixed !important;
@@ -118,40 +149,83 @@ export function buildSkinCss(value = {}) {
   return `${base}
 :root,
 body,
-#root,
-#root * {
+body[data-ds-dark-theme],
+#root {
   color-scheme: ${dark ? 'dark' : 'light'} !important;
   --dsw-alias-bg-base: ${skin.background} !important;
   --dsw-alias-bg-layer-1: ${skin.surface} !important;
-  --dsw-alias-bg-layer-2: ${dark ? rgba(skin.text, 0.055) : rgba(skin.text, 0.035)} !important;
-  --dsw-alias-bg-layer-3: ${dark ? rgba(skin.text, 0.09) : rgba(skin.text, 0.055)} !important;
-  --dsw-alias-bg-overlay: ${skin.surface} !important;
+  --dsw-alias-bg-layer-2: ${layer2} !important;
+  --dsw-alias-bg-layer-3: ${layer3} !important;
+  --dsw-alias-bg-module-platform: ${skin.surface} !important;
+  --dsw-alias-bg-multi-select: ${layer2} !important;
+  --dsw-alias-bg-overlay: ${layer3} !important;
   --dsw-alias-bg-mask-1: ${rgba(skin.background, 0.72)} !important;
   --dsw-alias-bg-mask-2: ${rgba(skin.background, 0.82)} !important;
   --dsw-alias-bg-mask-3: ${rgba(skin.background, 0.9)} !important;
+  --dsw-alias-bg-mask-drop: ${rgba(skin.background, 0.78)} !important;
   --dsw-alias-bg-skeleton: ${rgba(skin.text, dark ? 0.08 : 0.06)} !important;
   --dsw-alias-brand-primary: ${skin.accent} !important;
+  --dsw-alias-brand-primary-invert: ${dark ? skin.background : '#ffffff'} !important;
   --dsw-alias-brand-text: ${skin.accent} !important;
+  --dsw-alias-button-contrast-fill: ${skin.text} !important;
+  --dsw-alias-button-elevated-fill: ${skin.surface} !important;
+  --dsw-alias-button-floating-fill: ${skin.surface} !important;
+  --dsw-alias-button-floating-hover: ${layer3} !important;
+  --dsw-alias-button-ghost-active-border: ${borderStrong} !important;
   --dsw-alias-button-primary-fill: ${skin.accent} !important;
   --dsw-alias-button-primary-hover: ${rgba(skin.accent, 0.82)} !important;
+  --dsw-alias-button-primary-dimmed: ${rgba(skin.accent, 0.34)} !important;
   --dsw-alias-button-ghost-active-fill: ${hover} !important;
+  --dsw-alias-button-ghost-active-hover: ${active} !important;
   --dsw-alias-interactive-bg-hover: ${hover} !important;
-  --dsw-alias-interactive-bg-active: ${rgba(skin.accent, dark ? 0.26 : 0.15)} !important;
+  --dsw-alias-interactive-bg-hover-accent: ${active} !important;
+  --dsw-alias-interactive-bg-hover-solid: ${layer3} !important;
+  --dsw-alias-interactive-bg-active: ${active} !important;
   --dsw-alias-label-primary: ${skin.text} !important;
+  --dsw-alias-label-primary-bluish: ${skin.text} !important;
+  --dsw-alias-label-primary-dimmed: ${secondaryText} !important;
+  --dsw-alias-label-primary-foreground: ${skin.background} !important;
+  --dsw-alias-label-primary-inverted: ${dark ? skin.background : '#ffffff'} !important;
   --dsw-alias-label-secondary: ${secondaryText} !important;
   --dsw-alias-label-tertiary: ${tertiaryText} !important;
+  --dsw-alias-label-caption: ${tertiaryText} !important;
   --dsw-alias-label-dimmed: ${rgba(skin.text, dark ? 0.36 : 0.32)} !important;
   --dsw-alias-border-l1: ${border} !important;
+  --dsw-alias-border-l2-darkmode-thin: ${border} !important;
   --dsw-alias-border-l2: ${border} !important;
-  --dsw-alias-border-l3: ${rgba(skin.text, dark ? 0.22 : 0.16)} !important;
+  --dsw-alias-border-l3: ${borderStrong} !important;
+  --dsw-alias-border-l4: ${rgba(skin.text, dark ? 0.3 : 0.22)} !important;
   --dsw-alias-border-inverted: ${border} !important;
-  --dsw-alias-border-inverted2: ${rgba(skin.text, dark ? 0.22 : 0.16)} !important;
+  --dsw-alias-border-inverted2: ${borderStrong} !important;
+  --dsw-alias-markdown-citation: ${hover} !important;
+  --dsw-alias-markdown-code-block-banner: ${layer3} !important;
   --dsw-alias-markdown-code-block: ${dark ? rgba('#000000', 0.24) : rgba(skin.text, 0.045)} !important;
+  --dsw-alias-markdown-code-segment-selected: ${skin.surface} !important;
+  --dsw-alias-markdown-code-segment-unselected: ${layer3} !important;
+  --dsw-alias-markdown-inline-code: ${layer3} !important;
+  --dsw-alias-markdown-placeholder: ${layer2} !important;
+  --dsw-alias-markdown-tag: ${layer3} !important;
+  --dsw-alias-scrollbar-bg-l1: ${rgba(skin.text, 0.2)} !important;
+  --dsw-alias-scrollbar-bg-l2: ${rgba(skin.text, 0.2)} !important;
+  --dsw-alias-scrollbar-hover-l1: ${rgba(skin.text, 0.34)} !important;
+  --dsw-alias-scrollbar-hover-l2: ${rgba(skin.text, 0.34)} !important;
   --dsw-specific-menu: ${skin.surface} !important;
+  --dsw-specific-bubble: ${skin.input} !important;
+  --dsw-specific-bubble-highlight: ${active} !important;
+  --dsw-specific-input-major: ${skin.input} !important;
+  --dsw-specific-login-input: ${skin.input} !important;
+  --dsw-specific-selector: ${layer2} !important;
+  --dsw-specific-sidebar-fill: ${skin.sidebar} !important;
+  --dsw-specific-sidebar-nav-item-active-accent: ${active} !important;
+  --dsw-specific-sidebar-nav-item-active: ${layer3} !important;
+  --dsw-specific-sidebar-nav-item-hover: ${hover} !important;
+  --dsw-specific-tip: ${layer2} !important;
   --dsw-alias-toast-bg: ${skin.surface} !important;
   --dsw-alias-tooltip-bg: ${dark ? '#02060c' : skin.text} !important;
   --dsh-scrollbar-thumb: ${rgba(skin.text, 0.22)} !important;
   --dsh-scrollbar-thumb-hover: ${rgba(skin.text, 0.34)} !important;
+  --dsh-sidebar-inline-padding: 8px !important;
+  --studio-skin-radius: ${skin.radius}px !important;
   --dsl-code-block-border-radius: ${skin.radius}px !important;
   --dsl-terminal-radius: ${skin.radius}px !important;
   --dsl-read-radius: ${skin.radius}px !important;
@@ -163,9 +237,28 @@ html, body, #root {
   background: ${skin.background} !important;
   color: ${skin.text} !important;
 }
-button, input, textarea, select, [role="dialog"], [role="menu"] {
-  --studio-skin-radius: ${skin.radius}px;
+textarea,
+input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+select,
+[contenteditable="true"],
+[role="dialog"],
+[role="menu"],
+[role="listbox"] {
+  border-radius: ${skin.radius}px !important;
+}
+textarea, input, [contenteditable="true"] {
+  caret-color: ${skin.accent} !important;
 }
 ::selection { color: ${dark ? '#ffffff' : skin.text}; background: ${rgba(skin.accent, 0.34)}; }
+${skin.reducedMotion ? `
+html[data-dsh-studio-theme] *,
+html[data-dsh-studio-theme] *::before,
+html[data-dsh-studio-theme] *::after {
+  scroll-behavior: auto !important;
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+` : ''}
 `
 }
