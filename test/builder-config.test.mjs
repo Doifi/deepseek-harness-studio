@@ -25,6 +25,7 @@ test('release builds embed their trusted HTTPS feed in app metadata and publishe
   assert.equal(config.compression, 'normal')
   assert.ok(config.files.includes('!node_modules/**/*.map'))
   assert.ok(config.files.includes('!node_modules/**/*.d.ts'))
+  assert.ok(!config.files.some(file => file.includes('community-plugins')))
   assert.equal(config.artifactName, 'DeepSeek-Harness-Studio-${version}-${os}-${arch}.${ext}')
   assert.doesNotMatch(config.artifactName, /\s/)
 })

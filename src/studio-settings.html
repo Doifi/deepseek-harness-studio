@@ -3,101 +3,31 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:">
-  <title>Studio 设置</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'">
+  <title>Studio 更新</title>
   <link rel="stylesheet" href="./studio-settings.css">
 </head>
 <body>
-  <header class="hero">
-    <div>
-      <p class="eyebrow">DEEPSEEK HARNESS STUDIO</p>
-      <h1>个性化你的工作台</h1>
-      <p class="lede">选择一套皮肤，或用自己的色板调整官方 Web UI。所有设置只保存在本机。</p>
-    </div>
-    <span class="version" id="app-version">桌面版</span>
-  </header>
-
   <main>
-    <section class="panel" aria-labelledby="appearance-heading">
-      <div class="section-heading">
-        <div>
-          <p class="section-kicker">外观</p>
-          <h2 id="appearance-heading">皮肤与色板</h2>
-        </div>
-        <button class="button ghost" id="reset-skin" type="button">恢复官方皮肤</button>
+    <header class="hero">
+      <span class="mark" aria-hidden="true">↻</span>
+      <div>
+        <p class="eyebrow">DEEPSEEK HARNESS STUDIO</p>
+        <h1>应用更新</h1>
+        <p>管理桌面壳的自动更新。Harness 的界面和插件能力保持官方原样。</p>
       </div>
-      <div class="preset-grid" id="preset-grid" role="radiogroup" aria-label="皮肤预设"></div>
+    </header>
 
-      <div class="custom-panel" id="custom-panel">
-        <div class="skin-preview" id="skin-preview" aria-label="当前皮肤实时预览">
-          <div class="preview-sidebar">
-            <strong>侧栏</strong>
-            <span class="preview-nav active">当前会话</span>
-            <span class="preview-nav">工作区</span>
-          </div>
-          <div class="preview-content">
-            <span class="preview-kicker">内容区域</span>
-            <strong>统一覆盖整个 Harness 界面</strong>
-            <span class="preview-copy">导航、正文、弹层与输入区使用同一套色板。</span>
-            <span class="preview-input">输入区域 <b>发送</b></span>
-          </div>
-        </div>
-        <div class="color-grid">
-          <label class="color-field">
-            <span>强调色</span>
-            <span class="color-control"><input type="color" id="accent" value="#4d6bfe"><code id="accent-value">#4d6bfe</code></span>
-          </label>
-          <label class="color-field">
-            <span>页面背景</span>
-            <span class="color-control"><input type="color" id="background" value="#f7f8fa"><code id="background-value">#f7f8fa</code></span>
-          </label>
-          <label class="color-field">
-            <span>侧栏颜色</span>
-            <span class="color-control"><input type="color" id="sidebar" value="#f9fafb"><code id="sidebar-value">#f9fafb</code></span>
-          </label>
-          <label class="color-field">
-            <span>面板颜色</span>
-            <span class="color-control"><input type="color" id="surface" value="#ffffff"><code id="surface-value">#ffffff</code></span>
-          </label>
-          <label class="color-field">
-            <span>输入区颜色</span>
-            <span class="color-control"><input type="color" id="input" value="#ffffff"><code id="input-value">#ffffff</code></span>
-          </label>
-          <label class="color-field">
-            <span>正文颜色</span>
-            <span class="color-control"><input type="color" id="text" value="#181a1f"><code id="text-value">#181a1f</code></span>
-          </label>
-        </div>
-        <div class="appearance-controls">
-          <label class="range-field">
-            <span>界面圆角</span>
-            <input type="range" id="radius" min="4" max="24" step="1" value="12">
-            <output id="radius-value">12 px</output>
-          </label>
-          <label class="range-field">
-            <span>界面缩放</span>
-            <input type="range" id="font-scale" min="85" max="120" step="5" value="100">
-            <output id="font-scale-value">100%</output>
-          </label>
-          <label class="motion-row">
-            <span>
-              <strong>减少界面动画</strong>
-              <small>关闭不必要的过渡和循环动画</small>
-            </span>
-            <input type="checkbox" id="reduced-motion">
-            <span class="switch" aria-hidden="true"></span>
-          </label>
-        </div>
-        <p class="contrast-status" id="contrast-status" aria-live="polite"></p>
-        <p class="save-status" id="save-status" aria-live="polite">修改后自动保存并立即生效</p>
-      </div>
+    <section class="versions" aria-label="版本信息">
+      <div><span>桌面版</span><strong id="app-version">—</strong></div>
+      <div><span>官方 Harness</span><strong id="harness-version">—</strong></div>
     </section>
 
-    <section class="panel update-panel" aria-labelledby="update-heading">
+    <section class="panel" aria-labelledby="update-heading">
       <div class="section-heading">
         <div>
-          <p class="section-kicker">更新</p>
-          <h2 id="update-heading">自动保持最新</h2>
+          <p class="section-kicker">更新设置</p>
+          <h2 id="update-heading">保持应用为最新版本</h2>
         </div>
         <label class="switch-row">
           <input type="checkbox" id="auto-check" checked>
@@ -105,22 +35,21 @@
           <span>启动时检查</span>
         </label>
       </div>
+
       <div class="update-card">
+        <span class="status-dot" id="status-dot" aria-hidden="true"></span>
         <div class="update-copy">
-          <span class="status-dot" id="status-dot" aria-hidden="true"></span>
-          <div>
-            <strong id="update-title">准备检查更新</strong>
-            <p id="update-message">启动后将静默检查，发现新版时由你决定是否下载和安装。</p>
-          </div>
+          <strong id="update-title">准备检查更新</strong>
+          <p id="update-message">发现新版本后，由你决定是否下载和安装。</p>
         </div>
-        <button class="button primary" id="update-action" type="button">立即检查</button>
+        <button class="button" id="update-action" type="button">立即检查</button>
       </div>
       <div class="progress" id="update-progress" hidden><span id="update-progress-bar"></span></div>
-      <p class="privacy-note">更新只访问构建时配置的可信发布地址；不会上传会话、模型配置或工作区内容。</p>
+      <p class="privacy-note">更新只访问构建时配置的可信发布地址，不会上传会话、模型配置、API Key 或工作区内容。</p>
     </section>
   </main>
 
-  <footer>DeepSeek Harness Studio · 本地优先的社区桌面发行版</footer>
+  <footer>DeepSeek Harness Studio · 非 DeepSeek 官方桌面客户端</footer>
   <script src="./studio-settings.js"></script>
 </body>
 </html>

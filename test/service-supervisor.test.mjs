@@ -4,7 +4,11 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import test from 'node:test'
-import { extractEndpoint, ServiceSupervisor } from '../src/service-supervisor.mjs'
+import { extractEndpoint, HARNESS_WEB_ARGS, ServiceSupervisor } from '../src/service-supervisor.mjs'
+
+test('starts the official Web UI without opening a second browser window', () => {
+  assert.deepEqual(HARNESS_WEB_ARGS, ['web', '--port', '0', '--no-open'])
+})
 
 test('extractEndpoint accepts loopback URLs and rejects invalid ports', () => {
   assert.equal(extractEndpoint('ready: http://127.0.0.1:3080/'), 'http://127.0.0.1:3080')

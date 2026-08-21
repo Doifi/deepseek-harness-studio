@@ -7,7 +7,6 @@ import { ServiceSupervisor } from './service-supervisor.mjs'
 import { bundledNodeExecutable } from './node-runtime.mjs'
 import { errorPage, startupPage } from './pages.mjs'
 import { SettingsStore } from './settings-store.mjs'
-import { buildSkinCss, normalizeSkin, skinColorScheme, SKIN_PRESETS } from './skin.mjs'
 import { UpdateManager } from './update-manager.mjs'
 
 const require = createRequire(import.meta.url)
@@ -23,7 +22,6 @@ let studioWindow = null
 let supervisor = null
 let settingsStore = null
 let updateManager = null
-let insertedSkinKey = null
 let quitting = false
 let quitAfterStop = false
 let restartAttempts = 0
@@ -50,10 +48,6 @@ function dataUrl(html) {
   return `data:text/html;charset=utf-8,${encodeURIComponent(html)}`
 }
 
-function isStudioSettingsUrl(rawUrl) {
-  return rawUrl === 'studio://settings' || rawUrl === 'studio://settings/'
-}
-
 function allowedLocalUrl(rawUrl) {
   if (supervisor?.endpoint === null || supervisor?.endpoint === undefined) return false
   try {
@@ -65,60 +59,15 @@ function allowedLocalUrl(rawUrl) {
 
 function configureNavigation(window) {
   window.webContents.setWindowOpenHandler(({ url }) => {
-    if (isStudioSettingsUrl(url)) {
-      void openStudioSettings()
-      return { action: 'deny' }
-    }
     if (allowedLocalUrl(url)) return { action: 'allow' }
     if (/^https?:/i.test(url)) void shell.openExternal(url)
     return { action: 'deny' }
   })
   window.webContents.on('will-navigate', (event, url) => {
-    if (isStudioSettingsUrl(url)) {
-      event.preventDefault()
-      void openStudioSettings()
-      return
-    }
     if (allowedLocalUrl(url) || url.startsWith('data:text/html')) return
     event.preventDefault()
     if (/^https?:/i.test(url)) void shell.openExternal(url)
   })
-}
-
-async function decorateHarnessWindow(window) {
-  if (window.isDestroyed() || !allowedLocalUrl(window.webContents.getURL())) return
-  const skin = normalizeSkin(settingsStore?.value.skin)
-  const colorScheme = skinColorScheme(skin)
-  if (insertedSkinKey !== null) {
-    await window.webContents.removeInsertedCSS(insertedSkinKey).catch(() => {})
-    insertedSkinKey = null
-  }
-  window.webContents.setZoomFactor(skin.fontScale / 100)
-  insertedSkinKey = await window.webContents.insertCSS(buildSkinCss(skin))
-  await window.webContents.executeJavaScript(`(() => {
-    const studioTheme = ${JSON.stringify(colorScheme)};
-    const root = document.documentElement;
-    if (studioTheme === 'official') {
-      const originalTheme = root.dataset.dshStudioOfficialTheme;
-      if (originalTheme) document.body.toggleAttribute('data-ds-dark-theme', originalTheme === 'dark');
-      delete root.dataset.dshStudioOfficialTheme;
-      delete root.dataset.dshStudioTheme;
-    } else {
-      if (!root.dataset.dshStudioOfficialTheme) {
-        root.dataset.dshStudioOfficialTheme = document.body.hasAttribute('data-ds-dark-theme') ? 'dark' : 'light';
-      }
-      document.body.toggleAttribute('data-ds-dark-theme', studioTheme === 'dark');
-      root.dataset.dshStudioTheme = studioTheme;
-    }
-    if (document.querySelector('#dsh-studio-appearance-button')) return;
-    const button = document.createElement('button');
-    button.id = 'dsh-studio-appearance-button';
-    button.type = 'button';
-    button.textContent = 'Studio 外观';
-    button.setAttribute('aria-label', '打开 DeepSeek Harness Studio 外观与更新设置');
-    button.addEventListener('click', () => { window.location.href = 'studio://settings'; });
-    document.body.append(button);
-  })()`, true)
 }
 
 function createWindow() {
@@ -139,13 +88,9 @@ function createWindow() {
     },
   })
   configureNavigation(window)
-  window.webContents.on('did-finish-load', () => void decorateHarnessWindow(window))
   window.once('ready-to-show', () => window.show())
   window.on('closed', () => {
-    if (mainWindow === window) {
-      mainWindow = null
-      insertedSkinKey = null
-    }
+    if (mainWindow === window) mainWindow = null
   })
   return window
 }
@@ -153,7 +98,7 @@ function createWindow() {
 function studioState() {
   return {
     settings: settingsStore?.value,
-    presets: SKIN_PRESETS,
+    harnessVersion: HARNESS_VERSION,
     update: updateManager?.state ?? {
       phase: 'disabled',
       currentVersion: app.getVersion(),
@@ -178,14 +123,14 @@ async function openStudioSettings() {
     return
   }
   studioWindow = new BrowserWindow({
-    width: 920,
-    height: 790,
-    minWidth: 720,
-    minHeight: 640,
+    width: 680,
+    height: 570,
+    minWidth: 560,
+    minHeight: 480,
     parent: mainWindow ?? undefined,
     modal: false,
     show: false,
-    title: 'Studio 设置',
+    title: 'Studio 更新',
     backgroundColor: '#080d17',
     autoHideMenuBar: true,
     webPreferences: {
@@ -345,20 +290,6 @@ function registerStudioIpc() {
     requireStudioSender(event)
     return studioState()
   })
-  ipcMain.handle('studio:save-skin', async (event, skin) => {
-    requireStudioSender(event)
-    await settingsStore.update({ skin: normalizeSkin(skin) })
-    if (mainWindow !== null) await decorateHarnessWindow(mainWindow)
-    broadcastStudioState()
-    return studioState()
-  })
-  ipcMain.handle('studio:reset-skin', async event => {
-    requireStudioSender(event)
-    await settingsStore.update({ skin: normalizeSkin({ preset: 'official' }) })
-    if (mainWindow !== null) await decorateHarnessWindow(mainWindow)
-    broadcastStudioState()
-    return studioState()
-  })
   ipcMain.handle('studio:set-auto-check-updates', async (event, enabled) => {
     requireStudioSender(event)
     await settingsStore.update({ autoCheckUpdates: enabled === true })
@@ -403,7 +334,7 @@ function createApplicationMenu() {
     {
       label: 'Studio',
       submenu: [
-        { label: '外观与更新设置', accelerator: 'CmdOrCtrl+,', click: () => void openStudioSettings() },
+        { label: '应用更新设置', accelerator: 'CmdOrCtrl+,', click: () => void openStudioSettings() },
         {
           label: updateLabel,
           enabled: updateManager?.state.configured === true,
@@ -482,7 +413,6 @@ async function initialize() {
   settingsStore = new SettingsStore(join(userData, 'studio-settings.json'))
   await settingsStore.load()
   initializeUpdater()
-  registerStudioIpc()
   supervisor = new ServiceSupervisor({
     nodeExecutable,
     runnerPath: fileURLToPath(new URL('./service-runner.mjs', import.meta.url)),
@@ -495,6 +425,7 @@ async function initialize() {
     platform: process.platform,
   })
   supervisor.on('unexpected-exit', scheduleAutomaticRestart)
+  registerStudioIpc()
   createApplicationMenu()
   await loadHarness()
   createApplicationMenu()

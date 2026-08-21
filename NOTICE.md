@@ -2,7 +2,7 @@
 
 DeepSeek Harness Studio is a community packaging project. It is not an official DeepSeek desktop client.
 
-The application embeds the official `@deepseek-ai/dsh` npm distribution at version `0.1.0-rc.6`. DeepSeek Harness is available from <https://github.com/deepseek-ai/deepseek-harness> under the following MIT license:
+The application embeds the official `@deepseek-ai/dsh` npm distribution at version `0.1.1-rc.2`. DeepSeek Harness is available from <https://github.com/deepseek-ai/deepseek-harness> under the following MIT license:
 
 > MIT License
 >

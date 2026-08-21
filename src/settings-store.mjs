@@ -1,15 +1,12 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
-import { normalizeSkin } from './skin.mjs'
 
 export const DEFAULT_STUDIO_SETTINGS = Object.freeze({
-  skin: normalizeSkin({ preset: 'official' }),
   autoCheckUpdates: true,
 })
 
 export function normalizeStudioSettings(value = {}) {
   return {
-    skin: normalizeSkin(value.skin),
     autoCheckUpdates: value.autoCheckUpdates !== false,
   }
 }
