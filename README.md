@@ -11,24 +11,23 @@
 - Windows x64：下载名称包含 `win-x64.exe` 的安装包。
 - macOS Apple Silicon：下载名称包含 `mac-arm64.dmg` 的安装包。
 
-Windows 安装包和 macOS 应用在配置正式代码签名前可能显示未知开发者警告。请只从上述 Releases 页面下载，不要从第三方转载地址下载安装包。
+在配置正式代码签名前，系统可能显示未知开发者警告。请只从上述 Releases 页面下载安装包。
 
 ## 已实现
 
 - 内置 Electron、独立的官方 Node.js 24 LTS 运行时与 pnpm，不依赖系统 Node.js。
 - 自动启动和管理官方 `dsh web`，关闭桌面应用时安全停止本地服务。
 - 保留官方 Web UI、插件体系、MCP、Skills、会话和设置能力。
-- 完整皮肤中心：官方原色、深海夜航、星云紫、松林及自定义色板；可分别调整页面、侧栏、面板、输入区和文字颜色，以及圆角、界面缩放和减少动画。
-- 主题设置提供实时界面预览和文字对比度提示，并统一覆盖官方 Web UI 的侧栏、主区、弹层、菜单与输入组件；设置仅保存在本机并立即生效。
-- Windows 安装包使用面向安装速度的压缩策略，并剔除运行时不会读取的 Source Map 与类型声明文件，保留官方插件和运行依赖。
-- 启动自动检查更新：发现新版后由用户确认下载，下载完成后可安全停止 Harness 并重启安装。
+- 桌面壳不再注入皮肤、主题、缩放或悬浮入口，官方 Web UI 保持原样。
+- Windows 安装包使用面向安装速度的压缩策略，并剔除运行时不会读取的 Source Map 与类型声明文件，同时保留官方运行依赖。
+- 启动时可自动检查桌面应用更新；发现新版后由用户确认下载和安装。
 - 更新过程不会上传会话、模型配置、API Key 或工作区内容。
 - Harness 异常退出后最多自动重启三次，也可以通过菜单手动重启。
 - 单实例、外链交给系统浏览器、隔离渲染进程，以及 Windows/macOS 双平台构建流程。
 
 ## 本地数据
 
-- Studio 设置：应用数据目录下的 `studio-settings.json`
+- Studio 更新设置：应用数据目录下的 `studio-settings.json`
 - Harness 数据：应用数据目录下的 `harness/`
 - 运行日志：应用数据目录下的 `logs/harness.log`
 - 更新日志：应用数据目录下的 `logs/updates.log`
@@ -43,20 +42,11 @@ Windows 的典型应用数据位置是 `%APPDATA%\DeepSeek Harness Studio`，mac
 ```bash
 pnpm install --frozen-lockfile
 pnpm test
+pnpm smoke:service
 pnpm start
 ```
 
-Windows x64：
-
-```powershell
-pnpm dist:win
-```
-
-macOS Apple Silicon：
-
-```bash
-pnpm dist:mac
-```
+Windows x64：`pnpm dist:win`。macOS Apple Silicon：`pnpm dist:mac`。
 
 ## 自动更新发布
 
@@ -67,16 +57,16 @@ $env:DSH_STUDIO_UPDATE_URL='https://github.com/OWNER/REPOSITORY/releases/latest/
 pnpm dist:win
 ```
 
-构建会同时生成安装包、blockmap 和 `latest.yml`/`latest-mac.yml`。仓库自带的 GitHub Actions 在推送 `v*` 标签时，会自动把 Windows 与 macOS 产物发布到当前仓库的 GitHub Releases，并将正确地址写进客户端。未配置可信地址的本地构建会明确显示“更新源未配置”，不会访问占位域名。
+构建会生成安装包、blockmap 和平台更新元数据。仓库中的 GitHub Actions 会在推送 `v*` 标签时构建并发布产物。未配置可信地址的本地构建会显示“更新源未配置”，不会访问占位域名。
 
 macOS 自动更新要求应用完成代码签名。正式对外发布前也建议为 Windows 安装包配置代码签名证书。
 
 ## 上游与发布边界
 
 - 官方仓库：<https://github.com/deepseek-ai/deepseek-harness>
-- 锁定 Harness npm 版本：`0.1.0-rc.6`
-- 桌面壳版本：`0.3.0`
-- 上游目前属于 developer preview，升级依赖版本后必须重新完成桌面验收。
+- 锁定 Harness npm 版本：`0.1.1-rc.2`
+- 桌面壳版本：`0.4.0`
+- 上游目前属于预发布版本，升级依赖后必须重新完成桌面验收。
 
 许可与归属见 [LICENSE](LICENSE) 和 [NOTICE.md](NOTICE.md)。
 

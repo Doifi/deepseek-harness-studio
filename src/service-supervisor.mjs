@@ -5,6 +5,7 @@ import { dirname } from 'node:path'
 import { createRuntimeBin, createServiceEnvironment } from './runtime-bin.mjs'
 
 const ENDPOINT_PATTERN = /http:\/\/127\.0\.0\.1:(\d{1,5})(?:\/[^\s]*)?/
+export const HARNESS_WEB_ARGS = Object.freeze(['web', '--port', '0', '--no-open'])
 
 export function extractEndpoint(text) {
   const match = ENDPOINT_PATTERN.exec(text)
@@ -33,7 +34,9 @@ export class ServiceSupervisor extends EventEmitter {
   constructor(options) {
     super()
     this.options = {
-      readyTimeoutMs: 90_000,
+      // A freshly installed unpacked dependency tree can be scanned file by
+      // file by Windows security software before the first web boot.
+      readyTimeoutMs: 180_000,
       stopTimeoutMs: 8_000,
       spawnProcess: spawn,
       fetch: globalThis.fetch,
@@ -75,7 +78,7 @@ export class ServiceSupervisor extends EventEmitter {
     const env = createServiceEnvironment(options)
     const child = options.spawnProcess(
       options.nodeExecutable,
-      ['--expose-internals', options.runnerPath, options.cliPath, 'web', '--port', '0'],
+      ['--expose-internals', options.runnerPath, options.cliPath, ...HARNESS_WEB_ARGS],
       {
         cwd: options.workspaceRoot,
         env,

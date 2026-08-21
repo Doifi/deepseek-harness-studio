@@ -11,23 +11,22 @@ Download the latest version from [GitHub Releases](https://github.com/Doifi/deep
 - Windows x64: choose the installer ending in `win-x64.exe`.
 - macOS Apple Silicon: choose the image ending in `mac-arm64.dmg`.
 
-Until production signing is configured, Windows and macOS may display an unknown-developer warning. Only download installers from the Releases page above.
+Until production signing is configured, the operating system may display an unknown-developer warning. Only download installers from the Releases page above.
 
 ## Included behavior
 
 - Bundled Electron, a separate official Node.js 24 LTS runtime, and pnpm.
 - Automatic startup, supervision, and graceful shutdown of the official `dsh web` service.
 - The official Web UI, plugin composition, MCP, Skills, sessions, and settings.
-- A complete local skin center with four curated presets, separate page/sidebar/panel/input/text colors, interface radius, zoom, and reduced-motion controls.
-- Live theme previews and contrast guidance, with consistent token coverage across the official Web UI sidebar, content, overlays, menus, and input components.
-- A Windows package optimized for faster extraction by using installation-oriented compression and excluding runtime-unused source maps and type declarations while preserving plugin dependencies.
-- Automatic update checks after startup, user-controlled download, progress feedback, and safe restart-to-install.
+- No wrapper-injected skins, themes, zoom overrides, or floating controls; the official Web UI remains unchanged.
+- A Windows package optimized for faster extraction by excluding runtime-unused source maps and type declarations while preserving official runtime dependencies.
+- Automatic desktop update checks, user-controlled download, progress feedback, and safe restart-to-install.
 - No session, model, credential, or workspace data is uploaded by the desktop updater.
 - Single-instance behavior, external-link isolation, a sandboxed renderer, and Windows/macOS build jobs.
 
 ## Local data
 
-- Studio preferences: `studio-settings.json` under Electron's app-data directory
+- Studio update preference: `studio-settings.json` under Electron's app-data directory
 - Harness home: `harness/` under the app-data directory
 - Harness log: `logs/harness.log`
 - Updater log: `logs/updates.log`
@@ -40,6 +39,7 @@ Developers need Node.js 24; end users do not.
 ```bash
 pnpm install --frozen-lockfile
 pnpm test
+pnpm smoke:service
 pnpm start
 ```
 
@@ -54,10 +54,10 @@ $env:DSH_STUDIO_UPDATE_URL='https://github.com/OWNER/REPOSITORY/releases/latest/
 pnpm dist:win
 ```
 
-The build produces installers, blockmaps, and the platform update metadata. The included GitHub Actions workflow injects the current repository's Releases URL and publishes both platforms when a `v*` tag is pushed. Local builds without a trusted feed remain usable and clearly report that updates are not configured instead of contacting a placeholder domain.
+The build produces installers, blockmaps, and platform update metadata. The included GitHub Actions workflow injects the repository's Releases URL and publishes both platforms when a `v*` tag is pushed. Local builds without a trusted feed clearly report that updates are not configured.
 
 macOS automatic updates require code signing. Windows signing is also strongly recommended before public distribution.
 
-The project pins `@deepseek-ai/dsh` to `0.1.0-rc.6`; the desktop wrapper version is `0.3.0`. Upstream remains a developer preview, so every dependency upgrade requires a fresh desktop acceptance run.
+The project pins `@deepseek-ai/dsh` to `0.1.1-rc.2`; the desktop wrapper version is `0.4.0`. Upstream remains a prerelease, so every dependency upgrade requires a fresh desktop acceptance run.
 
 See [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md) for license and attribution details.

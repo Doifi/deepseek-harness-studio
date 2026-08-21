@@ -10,7 +10,6 @@ test('persists normalized Studio settings locally', async () => {
   const path = join(root, 'studio-settings.json')
   const store = new SettingsStore(path)
   await store.load()
-  assert.equal(store.value.skin.preset, 'official')
   assert.equal(store.value.autoCheckUpdates, true)
 
   await store.update({
@@ -30,12 +29,7 @@ test('persists normalized Studio settings locally', async () => {
   })
   const restored = new SettingsStore(path)
   await restored.load()
-  assert.equal(restored.value.skin.accent, '#123456')
-  assert.equal(restored.value.skin.sidebar, '#050505')
-  assert.equal(restored.value.skin.input, '#181818')
-  assert.equal(restored.value.skin.radius, 18)
-  assert.equal(restored.value.skin.fontScale, 110)
-  assert.equal(restored.value.skin.reducedMotion, true)
+  assert.deepEqual(restored.value, { autoCheckUpdates: false })
   assert.equal(restored.value.autoCheckUpdates, false)
-  assert.match(await readFile(path, 'utf8'), /"preset": "custom"/)
+  assert.doesNotMatch(await readFile(path, 'utf8'), /"skin"/)
 })
